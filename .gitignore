@@ -1,0 +1,44 @@
+# --- External ---
+external/nodejs/node_modules/
+external/nodejs/dist/
+external/nodejs/.cache/
+
+# --- Git ---
+.git
+
+# --- Generated Files ---
+log/
+logs/
+
+# --- Go / Fiber API ---
+bin/
+/api/vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- IDEs & Editors ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- OS Generated Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

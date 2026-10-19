@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./seeder/_prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @db.VarChar(100)
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+
+  @@map("users")
+}
