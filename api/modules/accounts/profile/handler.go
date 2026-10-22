@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type Handler struct {
@@ -19,7 +19,7 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) GetAll(ctx *fiber.Ctx) error {
+func (h *Handler) GetAll(ctx fiber.Ctx) error {
 	users, err := h.service.GetAll()
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (h *Handler) GetAll(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) GetByID(ctx *fiber.Ctx) error {
+func (h *Handler) GetByID(ctx fiber.Ctx) error {
 	id, err := strconv.ParseUint(ctx.Query("id"), 10, 64)
 
 	if err != nil {
@@ -60,7 +60,7 @@ func (h *Handler) GetByID(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) GetByUsername(ctx *fiber.Ctx) error {
+func (h *Handler) GetByUsername(ctx fiber.Ctx) error {
 	username := strings.TrimSpace(ctx.Query("username"))
 
 	if username == "" {
@@ -84,7 +84,7 @@ func (h *Handler) GetByUsername(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) GetByEmail(ctx *fiber.Ctx) error {
+func (h *Handler) GetByEmail(ctx fiber.Ctx) error {
 	email := strings.TrimSpace(ctx.Query("email"))
 
 	if email == "" {
@@ -107,7 +107,7 @@ func (h *Handler) GetByEmail(ctx *fiber.Ctx) error {
 		"data":    user,
 	})
 }
-func (h *Handler) Update(ctx *fiber.Ctx) error {
+func (h *Handler) Update(ctx fiber.Ctx) error {
 	id, err := strconv.ParseUint(ctx.Params("id"), 10, 64)
 
 	if err != nil {
@@ -118,7 +118,7 @@ func (h *Handler) Update(ctx *fiber.Ctx) error {
 	}
 
 	var req _shared.UpdateUserRequest
-	err = ctx.BodyParser(&req)
+	err = ctx.Bind().Body(&req)
 
 	if err != nil {
 		return ctx.Status(400).JSON(fiber.Map{
@@ -159,7 +159,7 @@ func (h *Handler) Update(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h *Handler) Delete(ctx *fiber.Ctx) error {
+func (h *Handler) Delete(ctx fiber.Ctx) error {
 	id, err := strconv.ParseUint(ctx.Params("id"), 10, 64)
 
 	if err != nil {
@@ -192,7 +192,7 @@ func (h *Handler) Delete(ctx *fiber.Ctx) error {
 }
 
 // ============ Helper ============ //
-func errorCheck(err error, ctx *fiber.Ctx) error {
+func errorCheck(err error, ctx fiber.Ctx) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ctx.Status(404).JSON(fiber.Map{
 			"success": false,

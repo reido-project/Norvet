@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
 )
 
@@ -38,15 +38,15 @@ func main() {
 	}
 
 	// Initialize Fiber App
-	app := fiber.New(fiber.Config{
-		AppName: "Playground api Server v1.0",
-	})
+	app := fiber.New(fiber.Config{AppName: "Playground api Server v1.0"})
 
 	//Register Services
 	modules.Register(app, db)
 
 	// Save Routes
-	generateRoutesFile(app)
+	if os.Getenv("PRODUCTION") != "true" {
+		generateRoutesFile(app)
+	}
 
 	// Run The Server
 	port := os.Getenv("APP_PORT")

@@ -5,7 +5,7 @@ import (
 	"api/modules/accounts/_shared"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type Handler struct {
@@ -16,9 +16,9 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) Register(ctx *fiber.Ctx) error {
+func (h *Handler) Register(ctx fiber.Ctx) error {
 	var req _shared.CreateUserRequest
-	err := ctx.BodyParser(&req)
+	err := ctx.Bind().Body(&req)
 
 	if err != nil {
 		return ctx.Status(400).JSON(fiber.Map{

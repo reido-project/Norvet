@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/url"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func OpenPostgres(cfg config.Config) (*sql.DB, string, error) {
@@ -26,7 +26,7 @@ func OpenPostgres(cfg config.Config) (*sql.DB, string, error) {
 	q.Set("TimeZone", cfg.Postgres.Timezone)
 	u.RawQuery = q.Encode()
 
-	db, err := sql.Open("postgres", u.String())
+	db, err := sql.Open("pgx", u.String())
 	if err != nil {
 		return nil, "", fmt.Errorf("open PostgreSQL: %w", err)
 	}
