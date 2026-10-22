@@ -1,8 +1,10 @@
-package user
+package profile
 
 import (
+	"api/modules/accounts/_shared"
 	"database/sql"
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 
@@ -21,9 +23,10 @@ func (h *Handler) GetAll(ctx *fiber.Ctx) error {
 	users, err := h.service.GetAll()
 
 	if err != nil {
+		log.Printf("Error in endpoint /accounts/profile/all: %v", err)
 		return ctx.Status(500).JSON(fiber.Map{
 			"success": false,
-			"message": "failed to get users",
+			"message": "failed to get accounts",
 		})
 	}
 
@@ -104,43 +107,6 @@ func (h *Handler) GetByEmail(ctx *fiber.Ctx) error {
 		"data":    user,
 	})
 }
-
-func (h *Handler) Create(ctx *fiber.Ctx) error {
-	var req CreateUserRequest
-	err := ctx.BodyParser(&req)
-
-	if err != nil {
-		return ctx.Status(400).JSON(fiber.Map{
-			"success": false,
-			"message": "invalid request",
-		})
-	}
-
-	req.Username = strings.TrimSpace(req.Username)
-	req.Email = strings.TrimSpace(req.Email)
-
-	if req.Username == "" || req.Email == "" || req.Password == "" {
-		return ctx.Status(422).JSON(fiber.Map{
-			"success": false,
-			"message": "username, email, and password are required",
-		})
-	}
-
-	user, err := h.service.Create(&req)
-
-	if err != nil {
-		return ctx.Status(500).JSON(fiber.Map{
-			"success": false,
-			"message": "failed to create user",
-		})
-	}
-
-	return ctx.Status(201).JSON(fiber.Map{
-		"success": true,
-		"data":    user,
-	})
-}
-
 func (h *Handler) Update(ctx *fiber.Ctx) error {
 	id, err := strconv.ParseUint(ctx.Params("id"), 10, 64)
 
@@ -151,7 +117,7 @@ func (h *Handler) Update(ctx *fiber.Ctx) error {
 		})
 	}
 
-	var req UpdateUserRequest
+	var req _shared.UpdateUserRequest
 	err = ctx.BodyParser(&req)
 
 	if err != nil {
@@ -176,14 +142,14 @@ func (h *Handler) Update(ctx *fiber.Ctx) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ctx.Status(404).JSON(fiber.Map{
 			"success": false,
-			"message": "user not found",
+			"message": "accounts not found",
 		})
 	}
 
 	if err != nil {
 		return ctx.Status(500).JSON(fiber.Map{
 			"success": false,
-			"message": "failed to update user",
+			"message": "failed to update accounts",
 		})
 	}
 
@@ -208,20 +174,20 @@ func (h *Handler) Delete(ctx *fiber.Ctx) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ctx.Status(404).JSON(fiber.Map{
 			"success": false,
-			"message": "user not found",
+			"message": "accounts not found",
 		})
 	}
 
 	if err != nil {
 		return ctx.Status(500).JSON(fiber.Map{
 			"success": false,
-			"message": "failed to delete user",
+			"message": "failed to delete accounts",
 		})
 	}
 
 	return ctx.Status(200).JSON(fiber.Map{
 		"success": true,
-		"message": "user has been deleted",
+		"message": "accounts has been deleted",
 	})
 }
 
@@ -230,14 +196,14 @@ func errorCheck(err error, ctx *fiber.Ctx) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ctx.Status(404).JSON(fiber.Map{
 			"success": false,
-			"message": "user not found",
+			"message": "accounts not found",
 		})
 	}
 
 	if err != nil {
 		return ctx.Status(500).JSON(fiber.Map{
 			"success": false,
-			"message": "failed to get user",
+			"message": "failed to get accounts",
 		})
 	}
 

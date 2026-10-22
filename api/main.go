@@ -1,11 +1,13 @@
 package main
 
 import (
-	"api/modules/user"
+	"api/modules"
 	"api/persistence"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -27,7 +29,12 @@ func main() {
 	}
 
 	if sqlDB, ok := db.Db.(*sql.DB); ok {
-		defer sqlDB.Close()
+		defer func(sqlDB *sql.DB) {
+			err := sqlDB.Close()
+			if err != nil {
+				log.Printf("Error closing database: %v", err)
+			}
+		}(sqlDB)
 	}
 
 	// Initialize Fiber App
@@ -36,10 +43,42 @@ func main() {
 	})
 
 	//Register Services
-	user.Register(app, db)
+	modules.Register(app, db)
+
+	// Save Routes
+	generateRoutesFile(app)
 
 	// Run The Server
 	port := os.Getenv("APP_PORT")
-	log.Println("Server running on port :" + port)
+
+	if port == "" {
+		port = "8080"
+	}
+
+	log.SetFlags(0)
+
+	log.Println("\nRunning on port: " + port)
+	log.Println("Local: http://localhost:" + port)
+
 	log.Fatal(app.Listen(":" + port))
+}
+
+func generateRoutesFile(app *fiber.App) {
+	var sb strings.Builder
+	sb.WriteString("——— REGISTERED API ROUTES ———\n\n")
+
+	for _, route := range app.GetRoutes() {
+		methodFormatted := fmt.Sprintf("[%s]", route.Method)
+
+		line := fmt.Sprintf("%-8s %s\n", methodFormatted, route.Path)
+		sb.WriteString(line)
+	}
+
+	err := os.WriteFile("routes.txt", []byte(sb.String()), 0644)
+	if err != nil {
+		log.Printf("Failed to generate routes.txt: %v", err)
+		return
+	}
+
+	log.Println("Successfully generated routes.txt")
 }

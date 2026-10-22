@@ -3,18 +3,12 @@ external/nodejs/node_modules/
 external/nodejs/dist/
 external/nodejs/.cache/
 
-# --- Git ---
-.git
-
-# --- Generated Files ---
-log/
-logs/
-
 # --- Go / Fiber API ---
 bin/
 /api/vendor/
 *.exe
 *.exe~
+*.txt
 *.dll
 *.so
 *.dylib
@@ -26,6 +20,10 @@ go.work
 .env
 .env.local
 .env.*.local
+
+# --- Generated Files ---
+log/
+logs/
 
 # --- IDEs & Editors ---
 .idea/
