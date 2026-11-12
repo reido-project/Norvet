@@ -7,11 +7,14 @@ datasource db {
   provider = "mysql"
 }
 
-model User {
-  id       Int    @id @default(autoincrement())
-  username String @db.VarChar(100)
-  email    String @unique @db.VarChar(255)
-  password String @db.VarChar(255)
+model userModel {
+  id          Int      @id @default(autoincrement()) @db.UnsignedInt
+  username    String   @unique(map: "uq_users_username") @db.VarChar(100)
+  profileName String   @map("profile_name") @db.VarChar(100)
+  email       String   @unique(map: "uq_users_email") @db.VarChar(255)
+  password    String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.DateTime(3)
 
   @@map("users")
 }

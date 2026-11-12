@@ -1,13 +1,18 @@
 package main
 
 import (
+	"api/libs/nvt"
+	"api/libs/nvt/nvtdberr"
+	"api/libs/nvt/nvtsb"
 	"api/modules"
-	"api/persistence"
+	"context"
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
@@ -15,36 +20,53 @@ import (
 
 func main() {
 	// Load .env
-	err := godotenv.Load("../.env")
-
-	if err != nil {
-		log.Println("Notice: .env file not found, using system environment variables")
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatalf("Fatal: .env file not found. Please copy .env.example to .env\nGuide/Template: https://github.com/reido-project/Norvet\nDetails: %v", err)
 	}
 
+	// Initialize Fiber App
+	app := fiber.New(fiber.Config{
+		AppName: fmt.Sprintf("%s v%s", os.Getenv("APP_NAME"), os.Getenv("APP_VERSION")),
+	})
+
+	// Initialize Norvet context
+	diagnosticPtr := flag.Bool("D", false, "Run application in diagnostic mode")
+	timePtr := flag.Bool("disable-time", true, "Disable time on terminal log")
+	dirPtr := flag.String("dir", "logs/api", "Directory path for log output")
+	flag.Parse()
+
+	nvt.Init(nvt.Config{
+		Diagnostic:  *diagnosticPtr,
+		NvtLogTime:  *timePtr,
+		NvtLogColor: true,
+		LogOutput:   *dirPtr,
+	})
+
 	// Connect Database
-	db, err := persistence.Connect()
+	db, err := sqlbuilder.ConnectGoqu()
 
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		log.Fatalf("Failed to initialize database: %v\n", err)
 	}
 
 	if sqlDB, ok := db.Db.(*sql.DB); ok {
 		defer func(sqlDB *sql.DB) {
-			err := sqlDB.Close()
-			if err != nil {
-				log.Printf("Error closing database: %v", err)
+			if err := sqlDB.Close(); err != nil {
+				log.Printf("Error closing database: %v\n", err)
 			}
 		}(sqlDB)
 	}
 
-	// Initialize Fiber App
-	app := fiber.New(fiber.Config{AppName: "Playground api Server v1.0"})
+	// Initialize Norvet SQL Error Identifier (nvtdb)
+	loadCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_ = nvtdberr.LoadIndexes(loadCtx, db)
+	cancel()
 
-	//Register Services
+	//register Services
 	modules.Register(app, db)
 
 	// Save Routes
-	if os.Getenv("PRODUCTION") != "true" {
+	if nvt.Ctx() != nil && nvt.Ctx().Diagnostic {
 		generateRoutesFile(app)
 	}
 
@@ -57,8 +79,8 @@ func main() {
 
 	log.SetFlags(0)
 
-	log.Println("\nRunning on port: " + port)
-	log.Println("Local: http://localhost:" + port)
+	log.Println("Running on port: " + port)
+	log.Println("Local: http://localhost:" + port + "\n")
 
 	log.Fatal(app.Listen(":" + port))
 }
@@ -76,7 +98,7 @@ func generateRoutesFile(app *fiber.App) {
 
 	err := os.WriteFile("routes.txt", []byte(sb.String()), 0644)
 	if err != nil {
-		log.Printf("Failed to generate routes.txt: %v", err)
+		log.Printf("Failed to generate routes.txt: %v\n", err)
 		return
 	}
 

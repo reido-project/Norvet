@@ -1,13 +1,12 @@
 package modules
 
 import (
-	"api/modules/accounts"
+	"api/modules/auth"
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/gofiber/fiber/v3"
 )
 
 func Register(app *fiber.App, db *goqu.Database) {
-	// Register your services here
-	accounts.Register(app, db)
+	auth.Register(app, db)
 }

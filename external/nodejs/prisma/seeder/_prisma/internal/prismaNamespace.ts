@@ -171,7 +171,7 @@ export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
 /**
  * SelectSubset
  * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
- * Additionally, it validates, if both select and include are present. If the case, it errors.
+ * Additionally, it validates, if both select and include are present. If the case, it nvterr.
  */
 export type SelectSubset<T, U> = {
   [key in keyof T]: key extends keyof U ? T[key] : never
@@ -597,17 +597,17 @@ export interface PrismaClientBaseOptions {
    * @example
    * ```
    * // Shorthand for `emit: 'stdout'`
-   * log: ['query', 'info', 'warn', 'error']
+   * nvtlog: ['query', 'info', 'warn', 'error']
    * 
    * // Emit as events only
-   * log: [
+   * nvtlog: [
    *   { emit: 'event', level: 'query' },
    *   { emit: 'event', level: 'info' },
    *   { emit: 'event', level: 'warn' }
    *   { emit: 'event', level: 'error' }
    * ]
    * 
-   * / Emit as events and log to stdout
+   * / Emit as events and nvtlog to stdout
    * og: [
    *  { emit: 'stdout', level: 'query' },
    *  { emit: 'stdout', level: 'info' },
