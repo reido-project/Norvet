@@ -1,11 +1,10 @@
 package auth
 
 import (
-	"api/libs/nvt/nvterr"
-	"api/libs/nvt/nvtlog"
-	"api/libs/nvt/nvtval"
-
 	"github.com/gofiber/fiber/v3"
+	"gitlab.com/Norvet/nvterr"
+	"gitlab.com/Norvet/nvtlog"
+	"gitlab.com/Norvet/nvtval"
 )
 
 type handler struct {

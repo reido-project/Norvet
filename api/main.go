@@ -1,13 +1,8 @@
 package main
 
 import (
-	"api/libs/nvt"
-	"api/libs/nvt/nvtdberr"
-	"api/libs/nvt/nvtsb"
 	"api/modules"
 	"context"
-	"database/sql"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -16,6 +11,9 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
+	"gitlab.com/Norvet/nvtdberr"
+	sqlbuilder "gitlab.com/Norvet/nvtsb"
+	"gitlab.com/Norvet/nvtsql"
 )
 
 func main() {
@@ -29,18 +27,11 @@ func main() {
 		AppName: fmt.Sprintf("%s v%s", os.Getenv("APP_NAME"), os.Getenv("APP_VERSION")),
 	})
 
-	// Initialize Norvet context
-	diagnosticPtr := flag.Bool("D", false, "Run application in diagnostic mode")
-	timePtr := flag.Bool("disable-time", true, "Disable time on terminal log")
-	dirPtr := flag.String("dir", "logs/api", "Directory path for log output")
-	flag.Parse()
-
-	nvt.Init(nvt.Config{
-		Diagnostic:  *diagnosticPtr,
-		NvtLogTime:  *timePtr,
-		NvtLogColor: true,
-		LogOutput:   *dirPtr,
-	})
+	// Initialize Norvet libraries
+	diagnostic, err := initNorvet()
+	if err != nil {
+		log.Fatalf("Failed to initialize Norvet: %v\n", err)
+	}
 
 	// Connect Database
 	db, err := sqlbuilder.ConnectGoqu()
@@ -49,13 +40,11 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v\n", err)
 	}
 
-	if sqlDB, ok := db.Db.(*sql.DB); ok {
-		defer func(sqlDB *sql.DB) {
-			if err := sqlDB.Close(); err != nil {
-				log.Printf("Error closing database: %v\n", err)
-			}
-		}(sqlDB)
-	}
+	defer func() {
+		if err := nvtsql.CloseAll(); err != nil {
+			log.Printf("Error closing database: %v\n", err)
+		}
+	}()
 
 	// Initialize Norvet SQL Error Identifier (nvtdb)
 	loadCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -66,7 +55,7 @@ func main() {
 	modules.Register(app, db)
 
 	// Save Routes
-	if nvt.Ctx() != nil && nvt.Ctx().Diagnostic {
+	if diagnostic {
 		generateRoutesFile(app)
 	}
 

@@ -1,11 +1,12 @@
 package auth
 
 import (
-	"api/libs/nvt/nvtdberr"
-	"api/libs/nvt/nvterr"
-	"api/libs/nvt/nvthash"
 	"errors"
 	"time"
+
+	"gitlab.com/Norvet/nvtdberr"
+	"gitlab.com/Norvet/nvterr"
+	"gitlab.com/Norvet/nvthash"
 )
 
 type service struct {
